@@ -2,21 +2,18 @@ package com.sony.remoteControl;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
 public class Connection {
 
-	public Environment env;
-	URL url;
-	HttpURLConnection conn;
+	private URL url;
+	protected HttpURLConnection conn;
+	protected Environment env;
 
 	public Connection() {
 		super();
-		// TODO Auto-generated constructor stub
 	}
 
 	public Connection(String uri, Environment env) throws IOException {

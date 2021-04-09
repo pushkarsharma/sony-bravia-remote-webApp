@@ -1,12 +1,6 @@
 package com.sony.remoteControl;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -40,40 +34,53 @@ public class RemoteController {
 	public String volumeChange(@PathVariable String offset) throws IOException {
 		ConnectionResource connResource = new ConnectionResource("/sony/audio", env);
 		connResource.setRequestMethod("POST");
-
-		Map<String, String> headers = new HashMap<String, String>();
-		headers.put("Content-Type", "application/json; charset=UTF-8");
-		headers.put("X-Auth-PSK", env.getProperty("PSK"));
-		headers.put("Accept", "application/json");
-		connResource.setHeaders(headers);
+		connResource.setBaseRestHeaders();
 		connResource.setDoOutput(true);
 
+		String requestBodyJsonPayload;
 		RequestBody requestBody = new RequestBody();
-		requestBody.setMethod("setAudioVolume");
-		requestBody.setId(1);
 		List<Map<String, String>> volumeBodyList = new ArrayList<Map<String, String>>();
 		Map<String, String> volumeBodyMap = new HashMap<String, String>();
+
+		requestBody.setMethod("setAudioVolume");
+		requestBody.setId(98);
 		volumeBodyMap.put("volume", offset);
 		volumeBodyMap.put("ui", "on");
 		volumeBodyMap.put("target", "speaker");
 		volumeBodyList.add(volumeBodyMap);
 		requestBody.setParams(volumeBodyList);
 		requestBody.setVersion("1.0");
+		requestBodyJsonPayload = objectWriter.writeValueAsString(requestBody);
 
-		String requestBodyJson = objectWriter.writeValueAsString(requestBody);
+		return connResource.serviceCall(requestBodyJsonPayload);
+	}
 
-		OutputStream os = connResource.getConnectionOutputStream();
-		byte[] input = requestBodyJson.getBytes("utf-8");
-		os.write(input, 0, input.length);
+	@RequestMapping(method = RequestMethod.POST, path = "/navigate/{direction}")
+	public String navigate(@PathVariable String direction) throws IOException {
+		ConnectionResource connResource = new ConnectionResource("/sony/ircc", env);
+		connResource.setRequestMethod("POST");
+		connResource.setBaseXMLHeaders();
+		connResource.setDoOutput(true);
 
-		StringBuilder response = new StringBuilder();
-		BufferedReader br = new BufferedReader(new InputStreamReader(connResource.getInputStream(), "utf-8"));
-		String responseLine = null;
-		while ((responseLine = br.readLine()) != null) {
-			response.append(responseLine.trim());
-		}
-		System.out.println(response.toString());
+		String XMLPayload = String.format(env.getProperty("xml.payload"), env.getProperty(direction));
+		return connResource.serviceCall(XMLPayload);
+	}
 
-		return response.toString();
+	@RequestMapping(method = RequestMethod.POST, path = "/reboot")
+	public String reboot() throws IOException {
+		ConnectionResource connResource = new ConnectionResource("/sony/system", env);
+		connResource.setRequestMethod("POST");
+		connResource.setBaseRestHeaders();
+		connResource.setDoOutput(true);
+
+		String requestBodyJsonPayload;
+		RequestBody requestBody = new RequestBody();
+		requestBody.setMethod("requestReboot");
+		requestBody.setId(10);
+		requestBody.setParams(new ArrayList<Map<String, String>>());
+		requestBody.setVersion("1.0");
+		requestBodyJsonPayload = objectWriter.writeValueAsString(requestBody);
+
+		return connResource.serviceCall(requestBodyJsonPayload);
 	}
 }
