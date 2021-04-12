@@ -26,4 +26,8 @@ public class Connection {
 	public HttpURLConnection getConn() {
 		return conn;
 	}
+	
+	public void disconnect() {
+		this.conn.disconnect();
+	}
 }

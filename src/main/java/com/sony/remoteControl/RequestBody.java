@@ -6,7 +6,7 @@ import java.util.Map;
 public class RequestBody {
 	public String method;
 	public int id;
-	public List<Map<String, String>> params;
+	public List<Map<String, Object>> params;
 	public String version;
 
 	public RequestBody() {
@@ -30,11 +30,11 @@ public class RequestBody {
 		this.id = id;
 	}
 
-	public List<Map<String, String>> getParams() {
+	public List<Map<String, Object>> getParams() {
 		return params;
 	}
 
-	public void setParams(List<Map<String, String>> params) {
+	public void setParams(List<Map<String, Object>> params) {
 		this.params = params;
 	}
 
